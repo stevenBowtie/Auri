@@ -1,12 +1,28 @@
 #include <Arduino.h>
+#include <Servo.h>
 #include "lib/dual-vnh5019-motor-shield/DualVNH5019MotorShield.h"
 #include "lib/dual-vnh5019-motor-shield/DualVNH5019MotorShield.cpp"
 
+//2, 4, 6, 7, 8, 9, 10, A0, A1 Reserved by MotorShield
 #define AN_B A3
 #define AN_X A4
 #define AN_Y A5
-//2, 4, 6, 7, 8, 9, 10, A0, A1 Reserved by MotorShield
+
 DualVNH5019MotorShield md;
+
+Servo flap_l;
+Servo flap_r;
+//Servo range is 400-2600uS and moves 90 degrees in 1.5S or 1.466uS/1mS
+int min_r = 500;  //400 min
+int max_r = 2400; //2600 max
+int min_l = 500;
+int max_l = 2400;
+float us_ms = 1.466;
+float timestep = 0;
+unsigned long elapsed = 0;
+unsigned long lastRun = 0;
+bool count_sign = 1;
+int target = 0;
 
 unsigned long lastPrint = 0;
 
@@ -14,18 +30,36 @@ void setup(){
   Serial.begin( 115200 );
   pinMode( AN_B, INPUT_PULLUP );
   md.init();
+  flap_l.attach( 3 );
+  flap_r.attach( 5 );
+  target = min_r;
 }
 
 void loop(){
   if( millis() - lastPrint > 100 ){
     lastPrint = millis();
+/*
     Serial.print( analogRead( AN_X ) );
     Serial.print( "," );
     Serial.print( analogRead( AN_Y ) );
     Serial.print( "," );
     Serial.println( digitalRead( AN_B ) );
-    
+*/
+    Serial.println( target );
   }
+
+  if( !digitalRead( AN_B ) ){
+    elapsed = millis()-lastRun;
+    timestep = elapsed * us_ms; 
+    target = count_sign ? target+=timestep : target-=timestep ;
+    if( target > max_r ){ count_sign = 0; }
+    if( target < min_r ){ count_sign = 1; }
+    lastRun=millis();
+  }
+  else{ 
+    lastRun=millis();
+  }
+
   if( analogRead( AN_X ) < 250 ){
     //Out
     md.setM1Speed( -400 );
