@@ -10,13 +10,22 @@
 
 DualVNH5019MotorShield md;
 
+class wing{
+  public:
+    int min;
+    int max;
+    int direction;
+    int range;
+    int invert = 1;
+};
+
 Servo flap_l;
 Servo flap_r;
 //Servo range is 400-2600uS and moves 90 degrees in 1.5S or 1.466uS/1mS
-int min_r = 500;  //400 min
-int max_r = 2400; //2600 max
-int min_l = 500;
-int max_l = 2400;
+int min_r = 1300;  //400 min
+int max_r = 2000; //2600 max
+int min_l = 1200;
+int max_l = 2000;
 float us_ms = 1.466;
 float timestep = 0;
 unsigned long elapsed = 0;
@@ -54,6 +63,8 @@ void loop(){
     target = count_sign ? target+=timestep : target-=timestep ;
     if( target > max_r ){ count_sign = 0; }
     if( target < min_r ){ count_sign = 1; }
+    flap_l.writeMicroseconds( target );
+    flap_r.writeMicroseconds( target );
     lastRun=millis();
   }
   else{ 
