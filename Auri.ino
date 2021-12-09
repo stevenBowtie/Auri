@@ -18,13 +18,17 @@ class Wing{
     int range;
     int output;
     Servo servo;
+
     void init( Servo * servo_ptr ){
       servo = *servo_ptr;
       range = max - min;
+      servo.writeMicroseconds( min );
     }
-    void update(int target){
-      output = ( range * target )+min;
+
+    void update( float target ){
+      output = ( range * target ) + min;
       servo.writeMicroseconds( output );
+      Serial.println( output );
     }
 };
 
@@ -37,12 +41,12 @@ int min_r = 1300;  //400 min
 int max_r = 2000; //2600 max
 int min_l = 1200;
 int max_l = 2000;
-float us_ms = 1.466;
+float us_ms = 0.001466;
 float timestep = 0;
+float target = 0;
 unsigned long elapsed = 0;
 unsigned long lastRun = 0;
 bool count_sign = 1;
-int target = 0;
 
 unsigned long lastPrint = 0;
 
@@ -52,20 +56,17 @@ void setup(){
   md.init();
   flap_l.attach( 3 );
   flap_r.attach( 5 );
-  target = min_r;
-  wing_r.init( &flap_r );
+  wing_r.min = 1050;
+  wing_r.max = 1900;
+  wing_l.min = 1950;
+  wing_l.max = 1200;
+  wing_r.init( &flap_l );
+  wing_l.init( &flap_r );
 }
 
 void loop(){
   if( millis() - lastPrint > 100 ){
     lastPrint = millis();
-/*
-    Serial.print( analogRead( AN_X ) );
-    Serial.print( "," );
-    Serial.print( analogRead( AN_Y ) );
-    Serial.print( "," );
-    Serial.println( digitalRead( AN_B ) );
-*/
     Serial.println( target );
   }
 
@@ -73,10 +74,11 @@ void loop(){
     elapsed = millis()-lastRun;
     timestep = elapsed * us_ms; 
     target = count_sign ? target+=timestep : target-=timestep ;
-    if( target > max_r ){ count_sign = 0; }
-    if( target < min_r ){ count_sign = 1; }
-    flap_l.writeMicroseconds( target );
-    flap_r.writeMicroseconds( target );
+    if( target > 1 ){ count_sign = 0; }
+    if( target < 0 ){ count_sign = 1; }
+    
+    wing_r.update( target );
+    wing_l.update( target );
     lastRun=millis();
   }
   else{ 
