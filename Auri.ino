@@ -22,11 +22,11 @@ class Wing{
     void init( Servo * servo_ptr ){
       servo = *servo_ptr;
       range = max - min;
-      servo.writeMicroseconds( min );
+      servo.writeMicroseconds( max );
     }
 
     void update( float target ){
-      output = ( range * target ) + min;
+      output = max - ( range * target );
       servo.writeMicroseconds( output );
       Serial.println( output );
     }
@@ -41,7 +41,8 @@ int min_r = 1300;  //400 min
 int max_r = 2000; //2600 max
 int min_l = 1200;
 int max_l = 2000;
-float us_ms = 0.001466;
+//float us_ms = 0.001466;
+float us_ms = 0.001;
 float timestep = 0;
 float target = 0;
 unsigned long elapsed = 0;
