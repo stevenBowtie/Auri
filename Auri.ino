@@ -37,10 +37,6 @@ Wing wing_l;
 Servo flap_l;
 Servo flap_r;
 //Servo range is 400-2600uS and moves 90 degrees in 1.5S or 1.466uS/1mS
-int min_r = 1300;  //400 min
-int max_r = 2000; //2600 max
-int min_l = 1200;
-int max_l = 2000;
 //float us_ms = 0.001466;
 float us_ms = 0.001;
 float timestep = 0;
@@ -57,10 +53,10 @@ void setup(){
   md.init();
   flap_l.attach( 3 );
   flap_r.attach( 5 );
-  wing_r.min = 1050;
-  wing_r.max = 1900;
-  wing_l.min = 1950;
-  wing_l.max = 1200;
+  wing_r.min = 1225;
+  wing_r.max = 2000;
+  wing_l.min = 1900;
+  wing_l.max = 1150;
   wing_r.init( &flap_l );
   wing_l.init( &flap_r );
 }
